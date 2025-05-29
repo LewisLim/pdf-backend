@@ -53,7 +53,7 @@ app.get("/generate-pdf", async (req, res) => {
     }
     
     body {
-      margin-top: -170px !important;
+      margin-top: -120px !important;
       padding: 0;
     }
       `,
