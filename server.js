@@ -45,22 +45,24 @@ app.get("/generate-pdf", async (req, res) => {
 
     // Navigate to the URL
     await page.goto(url, { waitUntil: "networkidle" });
+    await page.waitForSelector(".bar-chart", { state: "visible" });
+    await page.waitForSelector(".pie-chart", { state: "visible" });
 
     await page.addStyleTag({
       content: `
-    header, footer, nav, .back-button {
-      display: none !important;
-    }
-    
-    body {
-      margin-top: -120px !important;
-      padding: 0;
-    }
-      `,
+        header, footer, nav, .hide-element-pdf {
+          display: none !important;
+        }
+        
+        body {
+          margin-top: -120px !important;
+          padding: 0;
+        }
+          `,
     });
 
-    // Wait for chart animations to complete and hidden items to disappear and move the main content up 
-    await page.waitForTimeout(2000);
+    // Wait for chart animations to complete and hidden items to disappear and move the main content up
+    await page.waitForTimeout(1500);
 
     // Debug with screenshot, or change headless to false at above
     // await page.screenshot({ path: "debug-screenshot.png", fullPage: true });
@@ -70,12 +72,12 @@ app.get("/generate-pdf", async (req, res) => {
       format: "A4",
       landscape: true,
       printBackground: true,
-      scale: 0.54, // zoom out as needed to fit content into the pdf
+      scale: 0.57, // zoom out as needed to fit content into the pdf
       margin: {
-        top: "0.5cm",
+        top: "0.7cm",
         right: "0.5cm",
         bottom: "0.5cm",
-        left: "0.5cm",
+        left: "0.7cm",
       },
       preferCSSPageSize: false,
     });
