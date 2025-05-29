@@ -27,6 +27,8 @@ app.get("/generate-pdf", async (req, res) => {
     // Get URL from query parameter (e.g., /generate-pdf?url=https://google.com)
     const url = req.query.url || "https://example.com";
 
+    const action = req.query.action || "download";
+
     // Launch browser
     const browser = await chromium.launch({
       headless: true,
@@ -35,21 +37,47 @@ app.get("/generate-pdf", async (req, res) => {
 
     // Create new page
     const page = await browser.newPage();
+
+    // Set viewport size (like browser window size)
+    await page.setViewportSize({ width: 1920, height: 1080 });
+
     console.log(`Loading page: ${url}`);
 
     // Navigate to the URL
     await page.goto(url, { waitUntil: "networkidle" });
 
+    // Wait for chart animations to complete
+    await page.waitForTimeout(2000);
+
+    await page.addStyleTag({
+      content: `
+    header, footer, nav, .back-button {
+      display: none !important;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+    }
+      `,
+    });
+
+    // Debug with screenshot, or change headless to false at above
+    // await page.screenshot({ path: "debug-screenshot.png", fullPage: true });
+
     // Generate PDF
     const pdf = await page.pdf({
       format: "A4",
+      landscape: true,
       printBackground: true,
+      scale: 1, // zoom out as needed to fit content into the pdf
       margin: {
         top: "1cm",
         right: "1cm",
         bottom: "1cm",
         left: "1cm",
       },
+      preferCSSPageSize: false,
     });
 
     // Close browser
@@ -59,7 +87,10 @@ app.get("/generate-pdf", async (req, res) => {
     // Send PDF back to client
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": "attachment; filename=generated.pdf",
+      "Content-Disposition":
+        action === "download"
+          ? "attachment; filename=generated.pdf"
+          : "inline; filename=generated.pdf",
       "Content-Length": pdf.length,
     });
 
