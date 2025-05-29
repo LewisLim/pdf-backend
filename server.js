@@ -46,9 +46,6 @@ app.get("/generate-pdf", async (req, res) => {
     // Navigate to the URL
     await page.goto(url, { waitUntil: "networkidle" });
 
-    // Wait for chart animations to complete
-    await page.waitForTimeout(2000);
-
     await page.addStyleTag({
       content: `
     header, footer, nav, .back-button {
@@ -56,11 +53,14 @@ app.get("/generate-pdf", async (req, res) => {
     }
     
     body {
-      margin: 0;
+      margin-top: -170px !important;
       padding: 0;
     }
       `,
     });
+
+    // Wait for chart animations to complete and hidden items to disappear and move the main content up 
+    await page.waitForTimeout(2000);
 
     // Debug with screenshot, or change headless to false at above
     // await page.screenshot({ path: "debug-screenshot.png", fullPage: true });
@@ -70,12 +70,12 @@ app.get("/generate-pdf", async (req, res) => {
       format: "A4",
       landscape: true,
       printBackground: true,
-      scale: 1, // zoom out as needed to fit content into the pdf
+      scale: 0.54, // zoom out as needed to fit content into the pdf
       margin: {
-        top: "1cm",
-        right: "1cm",
-        bottom: "1cm",
-        left: "1cm",
+        top: "0.5cm",
+        right: "0.5cm",
+        bottom: "0.5cm",
+        left: "0.5cm",
       },
       preferCSSPageSize: false,
     });
